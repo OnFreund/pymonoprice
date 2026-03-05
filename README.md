@@ -37,7 +37,7 @@ monoprice.set_mute(12, True)
 # Set volume for zone #13
 monoprice.set_volume(13, 15)
 
-# Set source 1 for zone #14 
+# Set source 1 for zone #14
 monoprice.set_source(14, 1)
 
 # Set treble for zone #15
@@ -67,7 +67,7 @@ async def main(loop):
     if zone_status.power:
         await monoprice.set_power(zone_status.zone, False)
 
-loop = asyncio.get_event_loop()
+loop = asyncio.new_event_loop()
 loop.run_until_complete(main(loop))
 
 ```
