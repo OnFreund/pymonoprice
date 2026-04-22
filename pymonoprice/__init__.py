@@ -26,10 +26,6 @@ LEN_EOL = len(EOL)
 TIMEOUT = 2  # Number of seconds before serial operation timeout
 
 
-class SerialTimeoutException(Exception):
-    """Serial read timeout."""
-
-
 def synchronized(
     func: Callable[Concatenate[Monoprice, _P], _T]
 ) -> Callable[Concatenate[Monoprice, _P], _T]:
@@ -132,18 +128,19 @@ class Monoprice:
             stopbits=serialx.StopBits.ONE,
             byte_size=8,
             parity=serialx.Parity.NONE,
-            buffer_character_count=0,
-            buffer_burst_timeout=TIMEOUT,
+            read_timeout=TIMEOUT,
+            write_timeout=TIMEOUT,
         )
-        # serialx requires explicit open/configure outside of a context manager.
         self._port.open()
-        self._port.configure_port()
 
     def _send_request(self, request: bytes) -> None:
         """
         :param request: request that is sent to the monoprice
         """
         _LOGGER.debug('Sending "%s"', request)
+        # clear
+        self._port.reset_output_buffer()
+        self._port.reset_input_buffer()
         # send
         self._port.write(request)
         self._port.flush()
@@ -161,7 +158,7 @@ class Monoprice:
         while True:
             c = self._port.read(1)
             if not c:
-                raise SerialTimeoutException(
+                raise serialx.SerialTimeoutException(
                     "Connection timed out! Last received bytes {}".format(
                         [hex(a) for a in result]
                     )

@@ -1,6 +1,7 @@
 import unittest
 
 import pymonoprice
+import serialx
 from pymonoprice import (get_monoprice, get_async_monoprice, ZoneStatus)
 from tests import create_dummy_port
 import asyncio
@@ -322,7 +323,7 @@ class TestMonoprice(unittest.TestCase):
         self.assertEqual(0, len(self.responses))
 
     def test_timeout(self):
-        with self.assertRaises(pymonoprice.SerialTimeoutException):
+        with self.assertRaises(serialx.SerialTimeoutException):
             self.monoprice.set_source(3, 3)
 
 

@@ -1,1 +1,1 @@
-serialx>=0.7.0
+serialx>=1.4.1
