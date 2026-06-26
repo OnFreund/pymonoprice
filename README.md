@@ -7,6 +7,8 @@ Python3 interface implementation for Monoprice 6 zone amplifier
 ## Notes
 This is for use with [Home-Assistant](http://home-assistant.io)
 
+The full RS-232 serial protocol is documented in [docs/rs232-protocol.md](docs/rs232-protocol.md).
+
 ## Usage
 ```python
 from pymonoprice import get_monoprice
