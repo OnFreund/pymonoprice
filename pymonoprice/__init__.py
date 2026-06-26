@@ -42,9 +42,9 @@ def locked_coro(
     coro: Callable[Concatenate[_AsyncLockable, _P], Awaitable[_T]]
 ) -> Callable[Concatenate[_AsyncLockable, _P], Awaitable[_T]]:
     @wraps(coro)
-    async def wrapper(self: _AsyncLockable, *args: _P.args, **kwargs: _P.kwargs) -> _T:
+    async def wrapper(self: _AsyncLockable, *args: _P.args, **kwargs: _P.kwargs) -> _T:  # type: ignore[misc]
         async with self._lock:
-            return await coro(self, *args, **kwargs)  # type: ignore[return-value]
+            return await coro(self, *args, **kwargs)
 
     return wrapper
 
@@ -53,7 +53,7 @@ def connected(
     coro: Callable[Concatenate[MonopriceProtocol, _P], Awaitable[_T]]
 ) -> Callable[Concatenate[MonopriceProtocol, _P], Awaitable[_T]]:
     @wraps(coro)
-    async def wrapper(
+    async def wrapper(  # type: ignore[misc]
         self: MonopriceProtocol, *args: _P.args, **kwargs: _P.kwargs
     ) -> _T:
         await self._connected.wait()
@@ -394,12 +394,12 @@ class MonopriceProtocol(asyncio.Protocol):
         super().__init__()
         self._lock = asyncio.Lock()
         self._tasks: set[asyncio.Task[None]] = set()
-        self._transport: SerialTransport = None
+        self._transport: SerialTransport | None = None
         self._connected = asyncio.Event()
         self.q: asyncio.Queue[bytes] = asyncio.Queue()
 
-    def connection_made(self, transport: SerialTransport) -> None:
-        self._transport = transport
+    def connection_made(self, transport: asyncio.BaseTransport) -> None:
+        self._transport = transport  # type: ignore[assignment]
         self._connected.set()
         _LOGGER.debug("port opened %s", self._transport)
 
@@ -417,6 +417,8 @@ class MonopriceProtocol(asyncio.Protocol):
         :return: ascii string returned by monoprice
         """
         result = bytearray()
+        assert self._transport is not None
+        assert self._transport.serial is not None
         self._transport.serial.reset_output_buffer()
         self._transport.serial.reset_input_buffer()
         while not self.q.empty():
@@ -521,4 +523,4 @@ async def get_async_monoprice(port_url: str) -> MonopriceAsync:
     _, protocol = await create_serial_connection(
         loop, MonopriceProtocol, port_url, baudrate=9600
     )
-    return MonopriceAsync(protocol, lock)
+    return MonopriceAsync(protocol, lock)  # type: ignore[arg-type]
