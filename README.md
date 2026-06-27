@@ -1,11 +1,13 @@
 ## Status
-[![Build Status](https://github.com/etsinko/pymonoprice/actions/workflows/ci.yml/badge.svg)](https://github.com/etsinko/pymonoprice/actions/workflows/ci.yml)[![Coverage Status](https://coveralls.io/repos/github/etsinko/pymonoprice/badge.svg)](https://coveralls.io/github/etsinko/pymonoprice)
+[![Build Status](https://github.com/OnFreund/pymonoprice/actions/workflows/ci.yml/badge.svg)](https://github.com/OnFreund/pymonoprice/actions/workflows/ci.yml)
 
 # pymonoprice
 Python3 interface implementation for Monoprice 6 zone amplifier
 
 ## Notes
 This is for use with [Home-Assistant](http://home-assistant.io)
+
+The full RS-232 serial protocol is documented in [docs/rs232-protocol.md](docs/rs232-protocol.md).
 
 ## Usage
 ```python
@@ -19,7 +21,7 @@ zone_status = monoprice.zone_status(11)
 print('Zone Number = {}'.format(zone_status.zone))
 print('Power is {}'.format('On' if zone_status.power else 'Off'))
 print('Mute is {}'.format('On' if zone_status.mute else 'Off'))
-print('Public Anouncement Mode is {}'.format('On' if zone_status.pa else 'Off'))
+print('Public Announcement Mode is {}'.format('On' if zone_status.pa else 'Off'))
 print('Do Not Disturb Mode is {}'.format('On' if zone_status.do_not_disturb else 'Off'))
 print('Volume = {}'.format(zone_status.volume))
 print('Treble = {}'.format(zone_status.treble))
@@ -37,7 +39,7 @@ monoprice.set_mute(12, True)
 # Set volume for zone #13
 monoprice.set_volume(13, 15)
 
-# Set source 1 for zone #14 
+# Set source 1 for zone #14
 monoprice.set_source(14, 1)
 
 # Set treble for zone #15
@@ -49,7 +51,7 @@ monoprice.set_bass(16, 7)
 # Set balance for zone #11
 monoprice.set_balance(11, 3)
 
-# Restore zone #11 to it's original state
+# Restore zone #11 to its original state
 monoprice.restore_zone(zone_status)
 ```
 
@@ -61,13 +63,32 @@ With `asyncio` flavor all methods of Monoprice object are coroutines.
 import asyncio
 from pymonoprice import get_async_monoprice
 
-async def main(loop):
-    monoprice = await get_async_monoprice('/dev/ttyUSB0', loop)
+async def main():
+    monoprice = await get_async_monoprice('/dev/ttyUSB0')
     zone_status = await monoprice.zone_status(11)
     if zone_status.power:
         await monoprice.set_power(zone_status.zone, False)
 
-loop = asyncio.get_event_loop()
-loop.run_until_complete(main(loop))
-
+asyncio.run(main())
 ```
+
+## Testing PRs
+
+Every pull request automatically publishes a test build as a GitHub pre-release. You can find the install command in the PR comment posted by the bot, or on the [Releases page](https://github.com/OnFreund/pymonoprice/releases) (pre-releases are tagged `pr-{number}`).
+
+**pip:**
+```
+pip install https://github.com/OnFreund/pymonoprice/releases/download/pr-42/pymonoprice-0.0.0.dev42-py3-none-any.whl
+```
+
+**Home Assistant** — temporarily update your integration's `manifest.json` to use the PEP 508 URL form so HA doesn't overwrite it on restart:
+```json
+{
+  "requirements": ["pymonoprice @ https://github.com/OnFreund/pymonoprice/releases/download/pr-42/pymonoprice-0.0.0.dev42-py3-none-any.whl"]
+}
+```
+Replace `42` with the actual PR number. Revert to the pinned version (e.g. `pymonoprice==0.6`) after testing.
+
+The install URL is stable for the lifetime of the PR — new commits to the same PR reuse the same tag and wheel name, so you don't need to update `manifest.json` if more commits are pushed.
+
+The pre-release and comment are deleted automatically when the PR is merged or closed.

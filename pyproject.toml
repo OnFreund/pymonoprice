@@ -1,4 +1,56 @@
 [build-system]
-
-requires = ["setuptools>=76.1.0", "wheel"]
+requires = ["setuptools>=61", "setuptools-scm>=8"]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "pymonoprice"
+dynamic = ["version"]
+description = "Python API for talking to Monoprice 6-zone amplifier"
+readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "On Freund", email = "onfreund@gmail.com" }]
+requires-python = ">=3.12"
+dependencies = [
+    "pyserial>=3.4",
+    "pyserial-asyncio-fast>=0.16",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+]
+
+[project.urls]
+Homepage = "https://github.com/OnFreund/pymonoprice"
+
+[tool.setuptools.packages.find]
+exclude = ["tests*"]
+
+[tool.setuptools.package-data]
+pymonoprice = ["py.typed"]
+
+[tool.setuptools_scm]
+# version derived from git tags (e.g. v0.6 → 0.6)
+
+[tool.mypy]
+python_version = "3.12"
+disallow_any_decorated = true
+disallow_any_explicit = true
+disallow_any_generics = true
+disallow_incomplete_defs = true
+disallow_subclassing_any = true
+disallow_untyped_calls = true
+disallow_untyped_decorators = true
+disallow_untyped_defs = true
+no_implicit_optional = true
+show_error_codes = true
+strict_equality = true
+warn_no_return = true
+warn_redundant_casts = true
+warn_unreachable = true
+warn_unused_configs = true
+warn_unused_ignores = true
+
+[[tool.mypy.overrides]]
+module = ["serial", "serial_asyncio_fast"]
+ignore_missing_imports = true
