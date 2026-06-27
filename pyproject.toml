@@ -22,8 +22,11 @@ classifiers = [
 [project.urls]
 Homepage = "https://github.com/OnFreund/pymonoprice"
 
+[tool.setuptools]
+include-package-data = false
+
 [tool.setuptools.packages.find]
-exclude = ["tests*"]
+include = ["pymonoprice*"]
 
 [tool.setuptools.package-data]
 pymonoprice = ["py.typed"]
