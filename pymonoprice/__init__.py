@@ -399,7 +399,8 @@ class MonopriceProtocol(asyncio.Protocol):
         self._connected = asyncio.Event()
         self.q: asyncio.Queue[bytes] = asyncio.Queue()
 
-    def connection_made(self, transport: serialx.SerialTransport) -> None:
+    def connection_made(self, transport: asyncio.BaseTransport) -> None:
+        assert isinstance(transport, serialx.SerialTransport)
         self._transport = transport
         self._connected.set()
         _LOGGER.debug("port opened %s", self._transport)
