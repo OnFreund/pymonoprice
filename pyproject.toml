@@ -11,8 +11,7 @@ license = { text = "MIT" }
 authors = [{ name = "On Freund", email = "onfreund@gmail.com" }]
 requires-python = ">=3.12"
 dependencies = [
-    "pyserial>=3.4",
-    "pyserial-asyncio-fast>=0.16",
+    "serialx>=0.7.0",
 ]
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -51,6 +50,3 @@ warn_unreachable = true
 warn_unused_configs = true
 warn_unused_ignores = true
 
-[[tool.mypy.overrides]]
-module = ["serial", "serial_asyncio_fast"]
-ignore_missing_imports = true

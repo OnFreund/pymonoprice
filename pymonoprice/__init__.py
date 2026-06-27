@@ -3,10 +3,9 @@ from __future__ import annotations
 import asyncio
 import logging
 import re
-import serial
+import serialx
 from dataclasses import dataclass
 from functools import wraps
-from serial_asyncio_fast import create_serial_connection, SerialTransport
 from threading import RLock
 from typing import TYPE_CHECKING
 
@@ -123,13 +122,15 @@ class Monoprice:
         Monoprice amplifier interface
         """
         self._lock = lock
-        self._port = serial.serial_for_url(port_url, do_not_open=True)
-        self._port.baudrate = 9600
-        self._port.stopbits = serial.STOPBITS_ONE
-        self._port.bytesize = serial.EIGHTBITS
-        self._port.parity = serial.PARITY_NONE
-        self._port.timeout = TIMEOUT
-        self._port.write_timeout = TIMEOUT
+        self._port = serialx.serial_for_url(
+            port_url,
+            baudrate=9600,
+            stopbits=serialx.StopBits.ONE,
+            byte_size=8,
+            parity=serialx.Parity.NONE,
+            read_timeout=TIMEOUT,
+            write_timeout=TIMEOUT,
+        )
         self._port.open()
 
     def _send_request(self, request: bytes) -> None:
@@ -157,7 +158,7 @@ class Monoprice:
         while True:
             c = self._port.read(1)
             if not c:
-                raise serial.SerialTimeoutException(
+                raise serialx.SerialTimeoutException(
                     "Connection timed out! Last received bytes {}".format(
                         [hex(a) for a in result]
                     )
@@ -394,12 +395,13 @@ class MonopriceProtocol(asyncio.Protocol):
         super().__init__()
         self._lock = asyncio.Lock()
         self._tasks: set[asyncio.Task[None]] = set()
-        self._transport: SerialTransport | None = None
+        self._transport: serialx.SerialTransport | None = None
         self._connected = asyncio.Event()
         self.q: asyncio.Queue[bytes] = asyncio.Queue()
 
     def connection_made(self, transport: asyncio.BaseTransport) -> None:
-        self._transport = transport  # type: ignore[assignment]
+        assert isinstance(transport, serialx.SerialTransport)
+        self._transport = transport
         self._connected.set()
         _LOGGER.debug("port opened %s", self._transport)
 
@@ -520,7 +522,7 @@ async def get_async_monoprice(port_url: str) -> MonopriceAsync:
     lock = asyncio.Lock()
 
     loop = asyncio.get_running_loop()
-    _, protocol = await create_serial_connection(
+    _, protocol = await serialx.create_serial_connection(
         loop, MonopriceProtocol, port_url, baudrate=9600
     )
     return MonopriceAsync(protocol, lock)  # type: ignore[arg-type]
