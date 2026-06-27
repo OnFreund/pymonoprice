@@ -122,7 +122,7 @@ class Monoprice:
         Monoprice amplifier interface
         """
         self._lock = lock
-        self._port = serialx.Serial(
+        self._port = serialx.serial_for_url(
             port_url,
             baudrate=9600,
             stopbits=serialx.StopBits.ONE,
